@@ -3,178 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Défi Cadeau !</title>
+    <title>Le Grand Défi Mathématique</title>
     <style>
         body {
             text-align: center;
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #333;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; color: #fff;
         }
-
         .container {
             background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            max-width: 600px;
-            width: 90%;
+            padding: 30px; border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 550px; width: 95%; color: #333;
         }
-
-        h1 { color: #2c3e50; font-size: 2.5em; }
-        .question-text { font-size: 1.8em; font-weight: bold; color: #e74c3c; margin: 20px 0; }
-
+        .progress-text { font-weight: bold; color: #2980b9; margin-bottom: 5px; }
+        .progress-outer { background: #eee; border-radius: 10px; height: 10px; margin-bottom: 20px; }
+        .progress-inner { background: #27ae60; height: 100%; width: 0%; border-radius: 10px; transition: 0.5s; }
+        .question-box { background: #f8f9fa; padding: 20px; border-radius: 15px; border: 2px dashed #3498db; margin-bottom: 20px; }
+        .question-text { font-size: 2.2em; font-weight: bold; color: #c0392b; }
         input[type="number"] {
-            padding: 12px;
-            font-size: 1.2em;
-            width: 80px;
-            text-align: center;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
+            padding: 12px; font-size: 1.3em; width: 120px; text-align: center;
+            border: 2px solid #bdc3c7; border-radius: 8px; outline: none;
         }
-
         button {
-            padding: 12px 25px;
-            font-size: 1.1em;
-            margin: 10px;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            transition: 0.3s;
+            padding: 12px 30px; font-size: 1.1em; margin-top: 15px;
+            cursor: pointer; border: none; border-radius: 8px; transition: 0.3s;
+            background-color: #3498db; color: white; width: 100%;
         }
-
-        .btn-primary { background-color: #3498db; color: white; }
-        .btn-success { background-color: #2ecc71; color: white; }
-        .btn-danger { background-color: #e74c3c; color: white; }
-
         .gift-card {
-            background: #fff;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px;
-            cursor: pointer;
-            display: inline-block;
-            width: 200px;
+            background: #fff; border: 2px solid #ddd; border-radius: 10px;
+            padding: 15px; margin: 10px 0; cursor: pointer; text-align: left; transition: 0.3s;
         }
-
-        #progress-container {
-            width: 100%;
-            background-color: #e0e0e0;
-            border-radius: 15px;
-            height: 25px;
-            margin: 20px 0;
-            display: none;
-        }
-        #progress-bar {
-            width: 0%;
-            height: 100%;
-            background-color: #2ecc71;
-            border-radius: 15px;
-            color: white;
-            font-weight: bold;
-            line-height: 25px;
-        }
-
-        .final-screen { background-color: #f1c40f; padding: 40px; border-radius: 20px; }
+        .gift-card:hover { border-color: #27ae60; background: #f0fff4; }
+        #loading-bar-container { background: #eee; height: 30px; border-radius: 15px; margin: 20px 0; overflow: hidden; display: none; }
+        #loading-bar-fill { background: #27ae60; width: 0%; height: 100%; color: white; line-height: 30px; font-weight: bold; }
+        .final-screen { background: #f1c40f; padding: 40px; border-radius: 20px; border: 6px solid #000; }
     </style>
 </head>
 <body>
 
 <div class="container" id="main-container">
     <div id="game-section">
-        <h1>🎯 Défi du Père Noël</h1>
-        <p>Réponds correctement pour choisir ton cadeau de luxe !</p>
-        <p id="question" class="question-text"></p>
-        <input type="number" id="answer" autofocus>
-        <button onclick="checkAnswer()" class="btn-primary">Valider</button>
+        <h1 id="title">🎅 Défi Royal (20 Étapes)</h1>
+        <div class="progress-text">Progression : <span id="current-q">1</span> / 20</div>
+        <div class="progress-outer"><div class="progress-inner" id="bar"></div></div>
+        
+        <div class="question-box">
+            <p id="question-type" style="font-size: 0.9em; color: #7f8c8d; text-transform: uppercase;"></p>
+            <p id="question" class="question-text"></p>
+        </div>
+
+        <input type="number" id="answer" placeholder="?" autofocus inputmode="numeric">
+        <button id="submit-btn" onclick="checkAnswer()">Valider la réponse</button>
     </div>
 </div>
 
 <script>
-let level = 0;
-const questions = [
-    { q: "5 + 7 =", a: 12 },
-    { q: "9 × 6 =", a: 54 },
-    { q: "45 ÷ 5 =", a: 9 },
-    { q: "12 + 18 =", a: 30 },
-    { q: "7 × 8 =", a: 56 }
-];
+let score = 0;
+const totalNeeded = 20;
+let currentAnswer = 0;
+
+function generateQuestion() {
+    const types = ['add', 'sub', 'mult', 'div', 'frac', 'perc'];
+    let type = types[Math.floor(Math.random() * types.length)];
+    let n1, n2, label;
+
+    switch(type) {
+        case 'add':
+            n1 = Math.floor(Math.random() * 100); n2 = Math.floor(Math.random() * 100);
+            currentAnswer = n1 + n2; label = "Addition"; 
+            document.getElementById("question").innerText = `${n1} + ${n2} = ?`; break;
+        case 'sub':
+            n1 = Math.floor(Math.random() * 100) + 50; n2 = Math.floor(Math.random() * 50);
+            currentAnswer = n1 - n2; label = "Soustraction"; 
+            document.getElementById("question").innerText = `${n1} - ${n2} = ?`; break;
+        case 'mult':
+            n1 = Math.floor(Math.random() * 12) + 2; n2 = Math.floor(Math.random() * 10) + 2;
+            currentAnswer = n1 * n2; label = "Multiplication"; 
+            document.getElementById("question").innerText = `${n1} × ${n2} = ?`; break;
+        case 'div':
+            n2 = Math.floor(Math.random() * 9) + 2; currentAnswer = Math.floor(Math.random() * 10) + 1;
+            n1 = n2 * currentAnswer; label = "Division"; 
+            document.getElementById("question").innerText = `${n1} ÷ ${n2} = ?`; break;
+        case 'frac':
+            let den = [2, 4, 5, 10][Math.floor(Math.random() * 4)];
+            currentAnswer = Math.floor(Math.random() * 10) + 1;
+            n1 = currentAnswer * den; label = "Fraction";
+            document.getElementById("question").innerText = `1/${den} de ${n1}`; break;
+        case 'perc':
+            let p = [10, 20, 25, 50][Math.floor(Math.random() * 4)];
+            n2 = (Math.floor(Math.random() * 5) + 1) * 100;
+            currentAnswer = (p * n2) / 100; label = "Pourcentage";
+            document.getElementById("question").innerText = `${p}% de ${n2}`; break;
+    }
+    document.getElementById("question-type").innerText = label;
+}
 
 function showQuestion() {
-    document.getElementById("question").innerText = questions[level].q;
+    document.getElementById("current-q").innerText = score + 1;
+    document.getElementById("bar").style.width = (score / totalNeeded * 100) + "%";
+    generateQuestion();
     document.getElementById("answer").value = "";
     document.getElementById("answer").focus();
 }
 
 function checkAnswer() {
-    let user = Number(document.getElementById("answer").value);
-    if (user === questions[level].a) {
-        level++;
-        if (level < questions.length) {
+    let inputField = document.getElementById("answer");
+    let user = Number(inputField.value);
+    if (inputField.value === "") return;
+
+    if (user === currentAnswer) {
+        score++;
+        if (score < totalNeeded) {
             showQuestion();
         } else {
-            showPrizeSelection();
+            showPrizes();
         }
     } else {
-        alert("Faux ! Recommence.");
+        alert("FAUX ! Le Père Noël change le calcul. Concentre-toi !");
+        showQuestion();
     }
 }
 
-function showPrizeSelection() {
+// GESTION TOUCHE ENTRÉE (PC)
+document.getElementById("answer").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // Évite tout comportement bizarre
+        checkAnswer();
+    }
+});
+
+function showPrizes() {
     document.getElementById("main-container").innerHTML = `
-        <h1>🌟 BRAVO ! Tu as gagné ! 🌟</h1>
-        <p>On est assez riche pour t'offrir ce que tu veux. Choisis ton cadeau :</p>
-        <div class="gift-card" onclick="startDownload('un iPhone 15 Pro')">📱 iPhone 15 Pro</div>
-        <div class="gift-card" onclick="startDownload('une Tesla Model S')">🚗 Tesla Model S</div>
-        <div class="gift-card" onclick="startDownload('10.000 Euros')">💰 10.000 Euros</div>
-        <br>
-        <button class="btn-danger">Non, je ne veux rien</button>
+        <h1>🏆 EXCEPTIONNEL ! 🏆</h1>
+        <p>Tu as gagné ! Choisis ta récompense :</p>
+        <div class="gift-card" onclick="startLoading('iPhone 16 Pro Max')">📱 iPhone 16 Pro Max</div>
+        <div class="gift-card" onclick="startLoading('Villa de Luxe')">🏠 Villa avec Piscine</div>
+        <div class="gift-card" onclick="startLoading('50.000€')">💰 50.000€ Cash</div>
     `;
 }
 
-function startDownload(gift) {
+function startLoading(item) {
     document.getElementById("main-container").innerHTML = `
-        <h1>🎁 Envoi de : ${gift}...</h1>
-        <p>Préparation du transfert sécurisé en cours.</p>
-        <div id="progress-container" style="display:block;">
-            <div id="progress-bar">0%</div>
-        </div>
-        <p id="status-text">Connexion au serveur du Père Noël...</p>
+        <h1>🎁 Livraison : ${item}</h1>
+        <div id="loading-bar-container" style="display:block;"><div id="loading-bar-fill">0%</div></div>
+        <p id="status">Vérification de la fortune du donateur...</p>
     `;
-    
-    let width = 0;
-    let bar = document.getElementById("progress-bar");
-    let status = document.getElementById("status-text");
-    
+    let w = 0;
     let interval = setInterval(() => {
-        if (width >= 100) {
-            clearInterval(interval);
-            setTimeout(finalPrank, 800);
-        } else {
-            width += Math.floor(Math.random() * 10) + 1;
-            if (width > 100) width = 100;
-            bar.style.width = width + "%";
-            bar.innerText = width + "%";
-            if(width > 50) status.innerText = "Validation du paiement par la banque...";
-            if(width > 80) status.innerText = "Livraison immédiate en cours...";
-        }
+        w += Math.floor(Math.random() * 5) + 1;
+        if (w >= 100) { w = 100; clearInterval(interval); setTimeout(finalScreen, 1000); }
+        document.getElementById("loading-bar-fill").style.width = w + "%";
+        document.getElementById("loading-bar-fill").innerText = w + "%";
+        if(w > 50) document.getElementById("status").innerText = "Transfert bancaire en cours...";
     }, 200);
 }
 
-function finalPrank() {
+function finalScreen() {
     document.getElementById("main-container").innerHTML = `
         <div class="final-screen">
             <h1 style="font-size: 3em;">🐟 Al domi tande !</h1>
             <h2 style="font-size: 2em;">Saw te panse ?</h2>
             <p style="font-size: 1.5em; font-weight: bold;">Gen vole isit la ! 😂</p>
-            <button onclick="location.reload()" class="btn-primary">Rejouer</button>
+            <button onclick="location.reload()" style="background:black;">Recommencer</button>
         </div>
     `;
 }
