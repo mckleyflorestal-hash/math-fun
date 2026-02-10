@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test de Rapidité Mathématique</title>
+    <title>Défi Rapidité</title>
     <style>
         body {
             text-align: center; font-family: 'Poppins', sans-serif;
@@ -17,20 +17,12 @@
         }
         #timer-container { width: 100%; background: #eee; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
         #timer-bar { width: 100%; height: 100%; background: #e74c3c; transition: width 1s linear; }
-        h1 { font-size: 1.8em; color: #2c3e50; }
-        input[type="text"], input[type="number"] {
-            padding: 12px; font-size: 1.1em; border: 2px solid #bdc3c7; border-radius: 8px; width: 80%; outline: none;
-        }
+        .score-badge { font-size: 1.2em; font-weight: bold; color: #27ae60; margin-bottom: 10px; }
         .question-box { background: #f8f9fa; padding: 25px; border-radius: 15px; border: 2px solid #3498db; margin: 15px 0; }
-        .question-text { font-size: 2em; font-weight: bold; color: #c0392b; }
-        button {
-            padding: 12px 25px; font-size: 1em; margin: 5px; cursor: pointer; border: none;
-            border-radius: 8px; transition: 0.3s; background-color: #3498db; color: white;
-        }
-        .gift-card {
-            background: #fff; border: 2px solid #ddd; border-radius: 10px;
-            padding: 15px; margin: 10px 0; cursor: pointer; text-align: left; font-weight: bold;
-        }
+        .question-text { font-size: 2.2em; font-weight: bold; color: #c0392b; }
+        input[type="number"] { padding: 12px; font-size: 1.3em; width: 80%; border: 2px solid #bdc3c7; border-radius: 8px; }
+        button { padding: 12px 25px; cursor: pointer; border: none; border-radius: 8px; background-color: #3498db; color: white; margin: 5px; }
+        .gift-card { background: #fff; border: 2px solid #ddd; border-radius: 10px; padding: 15px; margin: 10px 0; cursor: pointer; text-align: left; }
         .final-screen { background: #f1c40f; padding: 40px; border-radius: 20px; border: 6px solid #000; color: #000; }
     </style>
 </head>
@@ -38,11 +30,11 @@
 
 <div class="container" id="main-container">
     <div id="start-screen">
-        <h1>🏆 Défi de Rapidité</h1>
-        <p>Tu as <b>15 secondes par question</b>. <br>Atteins 20 bonnes réponses sur 50 pour gagner !</p>
-        <input type="text" id="pseudo" placeholder="Ton nom / pseudo" maxlength="20">
+        <h1>🏆 Concours de Rapidité</h1>
+        <p>Réponds correctement aux calculs avant que la barre ne se vide !</p>
+        <input type="text" id="pseudo" placeholder="Ton nom / pseudo" style="padding:10px; width:80%; border-radius:8px; border:1px solid #ccc;">
         <br><br>
-        <button onclick="initGame()">Commencer le test</button>
+        <button onclick="initGame()">Participer</button>
     </div>
 </div>
 
@@ -50,7 +42,8 @@
 let localUser = "";
 let correctAnswers = 0;
 let totalAsked = 0;
-const maxQuestions = 50;
+const maxQuestions = 50; // Limite invisible
+const goal = 20; // Score à atteindre pour gagner
 let timeLeft = 15;
 let timerInterval;
 let answerKey = 0;
@@ -58,15 +51,8 @@ let answerKey = 0;
 function initGame() {
     localUser = document.getElementById("pseudo").value;
     if (!localUser) return alert("Indique ton nom !");
-    
-    document.getElementById("main-container").innerHTML = `
-        <h1>Prêt ${localUser} ?</h1>
-        <p>Réponds vite, le chrono ne s'arrête jamais !</p>
-        <button onclick="nextRound()">C'est parti !</button>
-    `;
+    nextRound();
 }
-
-function stopTimer() { clearInterval(timerInterval); }
 
 function startTimer() {
     timeLeft = 15;
@@ -75,10 +61,9 @@ function startTimer() {
         timeLeft--;
         updateBar();
         if (timeLeft <= 0) {
-            stopTimer();
-            alert("Temps écoulé pour ce calcul !");
+            clearInterval(timerInterval);
             totalAsked++;
-            checkEnd();
+            checkStatus();
         }
     }, 1000);
 }
@@ -88,105 +73,78 @@ function updateBar() {
     if (bar) bar.style.width = (timeLeft / 15 * 100) + "%";
 }
 
-function generateMath() {
+function nextRound() {
+    document.getElementById("main-container").innerHTML = `
+        <div class="score-badge">Points obtenus : ${correctAnswers}</div>
+        <div id="timer-container"><div id="timer-bar"></div></div>
+        <div class="question-box"><p id="display-q" class="question-text"></p></div>
+        <input type="number" id="user-input" placeholder="Réponse..." autofocus inputmode="numeric">
+        <br><br>
+        <button onclick="verify()">Valider</button>
+    `;
+    
+    // Génération calcul
     const ops = ['+', '-', '*'];
     const op = ops[Math.floor(Math.random() * ops.length)];
-    let n1, n2, txt;
+    let n1, n2;
+    if (op === '+') { n1 = r(10, 50); n2 = r(10, 50); answerKey = n1+n2; }
+    else if (op === '-') { n1 = r(40, 80); n2 = r(1, 39); answerKey = n1-n2; }
+    else { n1 = r(2, 9); n2 = r(2, 9); answerKey = n1*n2; }
+    document.getElementById("display-q").innerText = `${n1} ${op.replace('*','×')} ${n2} = ?`;
 
-    if (op === '+') { n1 = r(10, 50); n2 = r(10, 50); answerKey = n1+n2; txt = `${n1} + ${n2}`; }
-    else if (op === '-') { n1 = r(30, 70); n2 = r(1, 29); answerKey = n1-n2; txt = `${n1} - ${n2}`; }
-    else { n1 = r(2, 9); n2 = r(2, 9); answerKey = n1*n2; txt = `${n1} × ${n2}`; }
-    
-    document.getElementById("display-q").innerText = txt + " = ?";
+    clearInterval(timerInterval);
+    startTimer();
+
+    document.getElementById("user-input").addEventListener("keydown", (e) => { if (e.key === "Enter") verify(); });
 }
 
 function r(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
-function nextRound() {
-    document.getElementById("main-container").innerHTML = `
-        <div id="timer-container"><div id="timer-bar"></div></div>
-        <p>Calcul ${totalAsked + 1} / 50</p>
-        <div class="question-box"><p id="display-q" class="question-text"></p></div>
-        <input type="number" id="user-input" placeholder="Réponse" autofocus inputmode="numeric">
-        <br><br>
-        <button onclick="verify()">Valider</button>
-        <button style="background:#95a5a6" onclick="skip()">Sauter</button>
-    `;
-    generateMath();
-    stopTimer();
-    startTimer();
-
-    document.getElementById("user-input").addEventListener("keydown", (e) => {
-        if (e.key === "Enter") verify();
-    });
-}
-
 function verify() {
-    const input = document.getElementById("user-input");
-    if (input.value === "") return;
-    if (Number(input.value) === answerKey) {
-        correctAnswers++;
-    }
+    const val = document.getElementById("user-input").value;
+    if (val === "") return;
+    if (Number(val) === answerKey) correctAnswers++;
     totalAsked++;
-    checkEnd();
+    checkStatus();
 }
 
-function skip() {
-    totalAsked++;
-    checkEnd();
-}
-
-function checkEnd() {
-    if (totalAsked >= maxQuestions) {
-        stopTimer();
-        endGame();
+function checkStatus() {
+    if (correctAnswers >= goal) {
+        clearInterval(timerInterval);
+        showWin();
+    } else if (totalAsked >= maxQuestions) {
+        clearInterval(timerInterval);
+        document.getElementById("main-container").innerHTML = `<h1>Échec</h1><p>Tu n'as pas eu assez de points.</p><button onclick="location.reload()">Réessayer</button>`;
     } else {
         nextRound();
     }
 }
 
-function endGame() {
-    if (correctAnswers >= 20) {
-        showPrizes();
-    } else {
-        document.getElementById("main-container").innerHTML = `
-            <h1>Test terminé !</h1>
-            <p>Score : <b>${correctAnswers}</b> / 50</p>
-            <p>Il fallait 20 points pour gagner. Tu as échoué.</p>
-            <button onclick="location.reload()">Réessayer</button>
-        `;
-    }
-}
-
-function showPrizes() {
+function showWin() {
     const cash = r(100, 500);
-    const iphones = ["iPhone 13", "iPhone 14", "iPhone 15"];
-    const phone = iphones[r(0,2)];
-    
+    const phone = ["iPhone 13", "iPhone 14", "iPhone 15"][r(0,2)];
     document.getElementById("main-container").innerHTML = `
-        <h1>🎊 FÉLICITATIONS ${localUser.toUpperCase()} !</h1>
-        <p>Ton score : ${correctAnswers}/50. Choisis ton lot :</p>
+        <h1>🎊 GAGNÉ ! 🎊</h1>
+        <p>Félicitations ${localUser}, tu as atteint le score requis !</p>
         <div class="gift-card" onclick="fakeLoad('${cash}$')">💰 Virement de ${cash}$</div>
         <div class="gift-card" onclick="fakeLoad('${phone}')">📱 Un ${phone}</div>
-        <div class="gift-card" onclick="fakeLoad('un ticket surprise')">🎁 Un ticket surprise</div>
+        <div class="gift-card" onclick="fakeLoad('une Carte Cadeau')">🎁 Carte Cadeau 100$</div>
     `;
 }
 
 function fakeLoad(item) {
     document.getElementById("main-container").innerHTML = `
-        <h1>Préparation de l'envoi...</h1>
-        <p>Objet : <b>${item}</b></p>
-        <div style="background:#eee; height:15px; border-radius:10px; margin:20px 0; overflow:hidden;">
-            <div id="f-bar" style="background:#27ae60; height:100%; width:0%; transition:0.2s;"></div>
-        </div>
-        <p id="stat">Connexion sécurisée...</p>
+        <h1>Envoi en cours...</h1>
+        <p>Lot : <b>${item}</b></p>
+        <div id="timer-container"><div id="f-bar" style="background:#27ae60; height:100%; width:0%; transition:0.2s;"></div></div>
+        <p id="stat">Validation du transfert...</p>
     `;
     let p = 0;
     const itv = setInterval(() => {
-        p += r(1, 3);
+        p += r(1, 4);
         if (p >= 100) { clearInterval(itv); reveal(); }
         document.getElementById("f-bar").style.width = p + "%";
-    }, 120);
+    }, 150);
 }
 
 function reveal() {
