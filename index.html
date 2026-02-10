@@ -1,90 +1,182 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <title>Petit jeu</title>
-  <style>
-    body {
-      text-align: center;
-      font-family: Arial;
-      margin-top: 80px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Défi Cadeau !</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
 
-    #noBtn {
-      position: absolute;
-    }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 90%;
+        }
 
-    button {
-      padding: 15px 30px;
-      font-size: 20px;
-      margin: 20px;
-    }
-  </style>
+        h1 { color: #2c3e50; font-size: 2.5em; }
+        .question-text { font-size: 1.8em; font-weight: bold; color: #e74c3c; margin: 20px 0; }
+
+        input[type="number"] {
+            padding: 12px;
+            font-size: 1.2em;
+            width: 80px;
+            text-align: center;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-success { background-color: #2ecc71; color: white; }
+        .btn-danger { background-color: #e74c3c; color: white; }
+
+        .gift-card {
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            cursor: pointer;
+            display: inline-block;
+            width: 200px;
+        }
+
+        #progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+            height: 25px;
+            margin: 20px 0;
+            display: none;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #2ecc71;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            line-height: 25px;
+        }
+
+        .final-screen { background-color: #f1c40f; padding: 40px; border-radius: 20px; }
+    </style>
 </head>
-
 <body>
 
-<h1>🎯 Petit défi rapide</h1>
-<p>Résous les calculs pour gagner un prix</p>
-
-<div id="game">
-  <p id="question"></p>
-  <input type="number" id="answer">
-  <button onclick="checkAnswer()">Valider</button>
+<div class="container" id="main-container">
+    <div id="game-section">
+        <h1>🎯 Défi du Père Noël</h1>
+        <p>Réponds correctement pour choisir ton cadeau de luxe !</p>
+        <p id="question" class="question-text"></p>
+        <input type="number" id="answer" autofocus>
+        <button onclick="checkAnswer()" class="btn-primary">Valider</button>
+    </div>
 </div>
 
 <script>
 let level = 0;
-
 const questions = [
-  { q: "5 + 7 =", a: 12 },
-  { q: "9 × 6 =", a: 54 },
-  { q: "45 ÷ 5 =", a: 9 },
-  { q: "12 + 18 =", a: 30 },
-  { q: "7 × 8 =", a: 56 }
+    { q: "5 + 7 =", a: 12 },
+    { q: "9 × 6 =", a: 54 },
+    { q: "45 ÷ 5 =", a: 9 },
+    { q: "12 + 18 =", a: 30 },
+    { q: "7 × 8 =", a: 56 }
 ];
 
 function showQuestion() {
-  document.getElementById("question").innerText =
-    questions[level].q;
+    document.getElementById("question").innerText = questions[level].q;
+    document.getElementById("answer").value = "";
+    document.getElementById("answer").focus();
 }
 
 function checkAnswer() {
-  let user = Number(document.getElementById("answer").value);
-
-  if (user === questions[level].a) {
-    level++;
-
-    if (level < questions.length) {
-      document.getElementById("answer").value = "";
-      showQuestion();
+    let user = Number(document.getElementById("answer").value);
+    if (user === questions[level].a) {
+        level++;
+        if (level < questions.length) {
+            showQuestion();
+        } else {
+            showPrizeSelection();
+        }
     } else {
-      showPrize();
+        alert("Faux ! Recommence.");
     }
-  } else {
-    alert("Essaie encore 🙂");
-  }
 }
 
-function showPrize() {
-  document.body.innerHTML = `
-    <h1>🎉 Félicitations ! 🎉</h1>
-    <p>Veux-tu recevoir une grande récompense ?</p>
-    <button onclick="accept()">Oui</button>
-    <button id="noBtn" onmouseover="moveNo()">Non</button>
-  `;
+function showPrizeSelection() {
+    document.getElementById("main-container").innerHTML = `
+        <h1>🌟 BRAVO ! Tu as gagné ! 🌟</h1>
+        <p>On est assez riche pour t'offrir ce que tu veux. Choisis ton cadeau :</p>
+        <div class="gift-card" onclick="startDownload('un iPhone 15 Pro')">📱 iPhone 15 Pro</div>
+        <div class="gift-card" onclick="startDownload('une Tesla Model S')">🚗 Tesla Model S</div>
+        <div class="gift-card" onclick="startDownload('10.000 Euros')">💰 10.000 Euros</div>
+        <br>
+        <button class="btn-danger">Non, je ne veux rien</button>
+    `;
 }
 
-function moveNo() {
-  let btn = document.getElementById("noBtn");
-  btn.style.top = Math.random() * window.innerHeight + "px";
-  btn.style.left = Math.random() * window.innerWidth + "px";
+function startDownload(gift) {
+    document.getElementById("main-container").innerHTML = `
+        <h1>🎁 Envoi de : ${gift}...</h1>
+        <p>Préparation du transfert sécurisé en cours.</p>
+        <div id="progress-container" style="display:block;">
+            <div id="progress-bar">0%</div>
+        </div>
+        <p id="status-text">Connexion au serveur du Père Noël...</p>
+    `;
+    
+    let width = 0;
+    let bar = document.getElementById("progress-bar");
+    let status = document.getElementById("status-text");
+    
+    let interval = setInterval(() => {
+        if (width >= 100) {
+            clearInterval(interval);
+            setTimeout(finalPrank, 800);
+        } else {
+            width += Math.floor(Math.random() * 10) + 1;
+            if (width > 100) width = 100;
+            bar.style.width = width + "%";
+            bar.innerText = width + "%";
+            if(width > 50) status.innerText = "Validation du paiement par la banque...";
+            if(width > 80) status.innerText = "Livraison immédiate en cours...";
+        }
+    }, 200);
 }
 
-function accept() {
-  document.body.innerHTML = `
-    <h1>🐟 POISSON D'AVRIL 🐟</h1>
-    <p>Tu t'es fait piéger 😄</p>
-  `;
+function finalPrank() {
+    document.getElementById("main-container").innerHTML = `
+        <div class="final-screen">
+            <h1 style="font-size: 3em;">🐟 Al domi tande !</h1>
+            <h2 style="font-size: 2em;">Saw te panse ?</h2>
+            <p style="font-size: 1.5em; font-weight: bold;">Gen vole isit la ! 😂</p>
+            <button onclick="location.reload()" class="btn-primary">Rejouer</button>
+        </div>
+    `;
 }
 
 showQuestion();
