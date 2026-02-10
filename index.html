@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Petit jeu</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial;
+      margin-top: 80px;
+    }
+
+    #noBtn {
+      position: absolute;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 20px;
+      margin: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🎯 Petit défi rapide</h1>
+<p>Résous les calculs pour gagner un prix</p>
+
+<div id="game">
+  <p id="question"></p>
+  <input type="number" id="answer">
+  <button onclick="checkAnswer()">Valider</button>
+</div>
+
+<script>
+let level = 0;
+
+const questions = [
+  { q: "5 + 7 =", a: 12 },
+  { q: "9 × 6 =", a: 54 },
+  { q: "45 ÷ 5 =", a: 9 },
+  { q: "12 + 18 =", a: 30 },
+  { q: "7 × 8 =", a: 56 }
+];
+
+function showQuestion() {
+  document.getElementById("question").innerText =
+    questions[level].q;
+}
+
+function checkAnswer() {
+  let user = Number(document.getElementById("answer").value);
+
+  if (user === questions[level].a) {
+    level++;
+
+    if (level < questions.length) {
+      document.getElementById("answer").value = "";
+      showQuestion();
+    } else {
+      showPrize();
+    }
+  } else {
+    alert("Essaie encore 🙂");
+  }
+}
+
+function showPrize() {
+  document.body.innerHTML = `
+    <h1>🎉 Félicitations ! 🎉</h1>
+    <p>Veux-tu recevoir une grande récompense ?</p>
+    <button onclick="accept()">Oui</button>
+    <button id="noBtn" onmouseover="moveNo()">Non</button>
+  `;
+}
+
+function moveNo() {
+  let btn = document.getElementById("noBtn");
+  btn.style.top = Math.random() * window.innerHeight + "px";
+  btn.style.left = Math.random() * window.innerWidth + "px";
+}
+
+function accept() {
+  document.body.innerHTML = `
+    <h1>🐟 POISSON D'AVRIL 🐟</h1>
+    <p>Tu t'es fait piéger 😄</p>
+  `;
+}
+
+showQuestion();
+</script>
+
+</body>
+</html>
